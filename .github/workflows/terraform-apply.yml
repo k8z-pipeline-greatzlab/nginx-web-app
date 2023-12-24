@@ -1,0 +1,190 @@
+### Reusable workflow to plan terraform deployment, create artifact and upload to workflow artifacts for consumption ###
+
+##   Video:  https://www.youtube.com/watch?v=HeX_vNQv7CE
+##   REPO:   https://github.com/RekhuGopal/AWS_EKS_Labs/blob/main/.github/workflows/01-EKS.yml
+name: 'Terraform Action'
+
+on:
+  push: #push:
+    branches:
+    - main
+
+  pull_request:
+permissions:
+  id-token: write # This is required for aws oidc connection
+  contents: read # This is required for actions/checkout
+  pull-requests: write # This is required for gh bot to comment PR
+
+env:
+  TF_LOG: INFO
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_GITHUB_ROLE : ${{ secrets.AWS_GITHUB_ROLE }}
+  AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
+  AWS_S3_BUCKET_KEY_NAME : "${{ secrets.AWS_S3_KEY_BUCKET }}.tfstate"
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    outputs:  
+      ec2_ip: ${{ steps.get-ec2-ip.outputs.ec2_ip }}
+    environment: dev
+    defaults:
+      run:
+        shell: bash  
+        working-directory: .  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ROLE }}
+          aws-region: us-east-1
+          role-session-name: GitHub-TF-ACTIONS_ROLE
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2.0.2
+        with:
+          terraform_version: 1.6.3
+          terraform_wrapper: false
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        id: init
+        env:
+          AWS_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+          AWS_BUCKET_KEY_NAME: "${{ secrets.AWS_S3_BUCKET_KEY_NAME }}.tfstate"
+        run: |
+          pwd
+          terraform init -backend-config="bucket=${AWS_BUCKET_NAME}" -backend-config="key=${AWS_BUCKET_KEY_NAME}" -backend-config="region=${AWS_REGION}"
+      
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan
+        if: github.event_name == 'pull_request'
+        continue-on-error: true
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+      
+      - uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style \`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Validation \`${{ steps.validate.outcome }}\`
+            <details><summary>Validation Output</summary>
+
+            \`\`\`\n
+            ${{ steps.validate.outputs.stdout }}
+            \`\`\`
+            </details>
+
+            #### Terraform Plan \`${{ steps.plan.outcome }}\`
+
+            <details><summary>Show Plan</summary>
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+            </details>
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })           
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
+      
+      - name: Get EC2 Public IP
+        id: get-ec2-ip
+        run: echo "ec2_ip=$(terraform output -json ec2_public_ips )" >> $GITHUB_OUTPUT
+        
+      - name: Display Terraform Apply Output
+        if: always()
+        run: |
+          echo "Terraform apply completed successfully"
+          echo "EC2 Public IP: ${{ steps.get-ec2-ip.outputs.ec2_ip }}"
+
+
+
+
+  # deploy-nginx:
+  #   runs-on: ubuntu-latest
+  #   needs: terraform-apply
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+
+  #     - name: Install Ansible
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install -y ansible
+      
+  #     # - name: Set Execute command to bash script
+  #     #   run: chmod +x ./.github/scripts/decrypt.sh
+      
+  #       # Runs a single command using the runners shell
+  #     # - name: Decrypt large secret
+  #     #   run: ./.github/scripts/decrypt.sh
+  #     #   env:
+  #     #     SECRET_PASSPHRASE: $
+
+  #     # - name: Decrypt Pem
+  #     #   run: |
+  #     #     pwd
+  #     #     ls -a
+         
+  #     - name: Find key
+  #       run: |
+  #         ls .github/
+  #         gpg --quiet --batch --yes --decrypt --passphrase="$LARGE_SECRET_PASSPHRASE" --output ./.github/secrets/smyndlo-key.pem ./.github/secrets/smyndlo-key.pem.gpg
+  #       env:
+  #         LARGE_SECRET_PASSPHRASE: ${{ secrets.SECRET_PASSPHRASE }}
+        
+  #     - name: Escalate Private Key Permissions
+  #       run: |
+  #         chmod 400 ./.github/secrets/smyndlo-key.pem
+        
+  #     - name: Display IP
+  #       run: |
+  #         echo "EC2 Public IP: ${{ needs.terraform-apply.outputs.ec2_ip }}"
+
+  #     - name: Create Inventory File
+  #       env:
+  #         EC2_PUBLIC_IP: ${{ needs.terraform-apply.outputs.ec2_ip }}
+  #       run: |
+  #         echo "[all]" > ./inventory.ini
+  #         echo "${{ needs.terraform-apply.outputs.ec2_ip }}" | tr -d '[]' | tr ',' '\n' >> ./inventory.ini
+  #         echo "[all:vars],ansible_user=ec2-user" | tr ',' '\n' >> ./inventory.ini
+  #         cat ./inventory.ini
+  #       continue-on-error: true
+
+  #     - name: Ping servers
+  #       env:
+  #         EC2_PUBLIC_IP: ${{ needs.terraform-apply.outputs.ec2_ip }}
+  #       run: ansible all -m ping 
+
+  #     - name: Run Ansible Playbook
+  #       env:
+  #         EC2_PUBLIC_IP: ${{ needs.terraform-apply.outputs.ec2_ip }}
+  #       run: ansible-playbook deploy_nginx.yml  
+  

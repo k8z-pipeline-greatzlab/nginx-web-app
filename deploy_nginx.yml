@@ -1,0 +1,31 @@
+---
+- name: Deploy Nginx webserver
+  hosts: all
+  become: true
+
+  tasks:
+  - name: Update Packages
+    yum:
+      update_cache: yes
+
+  - name: Enable NGINX repo
+    command: amazon-linux-extras enable nginx1
+
+  - name: Install NGINX
+    yum:
+      name: nginx
+      state: present
+
+  - name: Starting NGINX service
+    systemd:
+      name: nginx
+      state: started
+      enabled: yes
+
+  # - name: Starting nginx
+  #   shell: systemctl start nginx
+
+  # - name: Enable the NGINX service during boot process
+  #   service:
+  #     name: nginx
+  #     enabled: yes

@@ -19,5 +19,5 @@ variable "instance_name" {
     #     image = "ami-032930428bf1abbff"
     # }
   }
-  description = "EC2 server name and type"
+  description = "EC2 server name and type" 
 } 

@@ -24,7 +24,7 @@ resource "aws_lb_target_group" "this" {
   port        = 80
   protocol    = "HTTP"
   #target_type = "ip"
-  vpc_id      = "vpc-0ec8067849557d0f8"
+  vpc_id      = var.vpc_id
   depends_on = [aws_instance.public_ec3]
 }
 

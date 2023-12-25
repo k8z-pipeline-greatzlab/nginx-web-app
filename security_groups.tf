@@ -3,7 +3,7 @@ resource "aws_security_group" "public_ec3_sg" {
   
   name        = "gitops_ansilble_sg"
   description = "GitOps LAB sg"
-  vpc_id      = "vpc-0ec8067849557d0f8"
+  vpc_id      = var.vpc_id
 
   ingress {
     description = "SSH to EC2"

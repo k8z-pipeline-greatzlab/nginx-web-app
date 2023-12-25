@@ -170,7 +170,7 @@ jobs:
           ls .github/
           gpg --quiet --batch --yes --decrypt --passphrase="$LARGE_SECRET_PASSPHRASE" --output ./.github/secrets/ec2-dev-keypair-pem.pem ./.github/secrets/ec2-dev-keypair-pem.pem.gpg
         env:
-          LARGE_SECRET_PASSPHRASE: ${{ secrets.SECRET_PASSPHRASE }}
+          LARGE_SECRET_PASSPHRASE: ${{ secrets.LARGE_SECRET_PASSPHRASE }}
         
       - name: Escalate Private Key Permissions
         run: |

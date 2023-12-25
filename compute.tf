@@ -42,36 +42,3 @@ output "ec2_public_ips" {
 output "length" {
   value = length(var.instance_name)
 }
-
-
-resource "aws_ecr_repository" "name" {
-  for_each             = toset(var.repo_names)
-  name                 = "${var.project}/${each.value}"
-  image_tag_mutability = "MUTABLE"
-
-#  dynamic "encryption_configuration" {
-#    for_each = var.encryption_configuration == null ? [] : [var.encryption_configuration]
-#    content {
-#      encryption_type = encryption_configuration.value.encryption_type
-#      kms_key         = encryption_configuration.value.kms_key
-#    }
-#  }
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
-
-variable "repo_names" {
-  type = list(string)
-  default = ["test-repo"]
-}
-
-variable "project" {
-  type = string 
-  default = "grtz"
-}
-
-variable "region" {
-    default = "us-east-1"
-}

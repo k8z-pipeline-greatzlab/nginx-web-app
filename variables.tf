@@ -21,3 +21,15 @@ variable "instance_name" {
   }
   description = "EC2 server name and type"
 } 
+
+variable "s3_bucket_tf_state" {
+  default = ""
+}
+
+variable "tf_state_key" {
+  default = ""
+}
+
+variable "region" {
+    default = "us-east-1"
+}

@@ -11,12 +11,3 @@ provider "aws" {
   region = var.region
 }
 
-# terraform {
-#   cloud {
-#     organization = "greatzlabs"
-
-#     workspaces {
-#       name = "greatz-root"
-#     }
-#   }
-# }

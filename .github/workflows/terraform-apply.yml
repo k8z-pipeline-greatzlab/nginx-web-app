@@ -53,7 +53,7 @@ jobs:
       - name: Terraform Init
         id: init
         env:
-          AWS_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+          AWS_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET }}
           AWS_BUCKET_KEY_NAME: "${{ secrets.AWS_S3_BUCKET_KEY_NAME }}.tfstate"
         run: |
           pwd

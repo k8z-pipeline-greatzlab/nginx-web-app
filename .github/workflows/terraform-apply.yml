@@ -124,7 +124,7 @@ jobs:
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+        run: terraform apply -var-file=terraform.tfvars -auto-approve
       
       - name: Get EC2 Public IP
         id: get-ec2-ip

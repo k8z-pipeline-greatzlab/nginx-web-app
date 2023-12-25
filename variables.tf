@@ -23,13 +23,16 @@ variable "instance_name" {
 } 
 
 variable "s3_bucket_tf_state" {
+  type = string
   default = ""
 }
 
 variable "tf_state_key" {
+  type = string
   default = ""
 }
 
 variable "region" {
+  type = string
     default = "us-east-1"
 }

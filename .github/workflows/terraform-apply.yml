@@ -49,6 +49,12 @@ jobs:
           terraform_version: 1.6.3
           terraform_wrapper: false
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      
+      - name: Create .tfvars file
+        run: |
+          pwd
+          echo "${{ secrets.TFVARS_CONTENT }}" > terraform.tfvars
+          cat terraform.tfvars
 
       - name: Terraform Init
         id: init
@@ -58,11 +64,6 @@ jobs:
         run: |
           pwd
           terraform init -backend-config="bucket=${AWS_BUCKET_NAME}" -backend-config="key=${AWS_BUCKET_KEY_NAME}" -backend-config="region=${AWS_REGION}"
-      
-      - name: Create .tfvars file
-        run: |
-          pwd
-          echo "${{ secrets.TFVARS_CONTENT }}" > myvars.tfvars
 
       - name: Terraform Validate
         id: validate
@@ -70,7 +71,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -var-file=myvars.tfvars
+        run: terraform plan -var-file=terraform.tfvars
         if: github.event_name == 'pull_request'
         continue-on-error: true
 

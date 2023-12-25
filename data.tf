@@ -12,11 +12,11 @@ data "aws_subnets" "available" {
   }
 }
 
-data "aws_subnet" "selected" {
-  for_each = toset(data.aws_subnets.available.ids)
-  id       = each.value
-}
+# data "aws_subnet" "selected" {
+#   data.aws_vpc.selected.id
+#   id       = each.value
+# }
 
 output "subnet_cidr_blocks" {
-  value = [for s in data.aws_subnet.selected : s.cidr_block]
+  value = slice(data.aws_subnets.available.ids, 0, 3) #[for s in data.aws_subnet.available.ids : s.ids]
 }

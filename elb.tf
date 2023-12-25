@@ -5,7 +5,7 @@ resource "aws_lb" "this" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.public_ec3_sg[count.index].id]
-  subnets            = slice(data.aws_subnet.selected, 0, 3)
+  subnets            = slice(data.aws_subnets.available.ids, 0, 3)
 
   enable_deletion_protection = false
 

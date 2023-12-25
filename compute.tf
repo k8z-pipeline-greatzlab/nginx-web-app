@@ -2,7 +2,7 @@ resource "aws_instance" "public_ec3" {
   for_each      = var.instance_name
   ami           = each.value["image"]
   instance_type = each.value["type"]
-  subnet_id     = var.subnet_id
+  subnet_id     = data.aws_subnets.available.ids[0]
   key_name      = var.key_name 
   iam_instance_profile = var.iam_instance_profile
 

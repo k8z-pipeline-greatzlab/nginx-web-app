@@ -9,3 +9,6 @@ output "ec2_public_ips" {
 output "length" {
   value = length(var.instance_name)
 }
+output "subnet_cidr_blocks" {
+  value = slice(data.aws_subnets.available.ids, 0, 3) 
+}

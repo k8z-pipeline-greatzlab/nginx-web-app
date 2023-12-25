@@ -168,13 +168,13 @@ jobs:
       - name: Find key
         run: |
           ls .github/
-          gpg --quiet --batch --yes --decrypt --passphrase="$LARGE_SECRET_PASSPHRASE" --output ./.github/secrets/smyndlo-key.pem ./.github/secrets/smyndlo-key.pem.gpg
+          gpg --quiet --batch --yes --decrypt --passphrase="$LARGE_SECRET_PASSPHRASE" --output ./.github/secrets/ec2-dev-keypair-pem.pem ./.github/secrets/ec2-dev-keypair-pem.pem.gpg
         env:
           LARGE_SECRET_PASSPHRASE: ${{ secrets.SECRET_PASSPHRASE }}
         
       - name: Escalate Private Key Permissions
         run: |
-          chmod 400 ./.github/secrets/smyndlo-key.pem
+          chmod 400 ./.github/secrets/ec2-dev-keypair-pem.pem
         
       - name: Display IP
         run: |

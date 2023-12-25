@@ -56,6 +56,10 @@ jobs:
           echo "region = \"${{ secrets.AWS_REGION }}\"" > terraform.tfvars
           echo "s3_bucket_tf_state = \"${{ secrets.AWS_S3_BUCKET }}\"" >> terraform.tfvars
           echo "tf_state_key = \"${{ secrets.AWS_S3_KEY_BUCKET }}\"" >> terraform.tfvars
+          echo "subnet_id  = \"${{ secrets.AWS_SUBNET_ID }}\"" >> terraform.tfvars
+          echo "vpc_id = \"${{ secrets.AWS_VPC_ID }}\"" >> terraform.tfvars
+          echo "key_name = \"${{ secrets.AWS_KEY_NAME }}\"" >> terraform.tfvars
+          echo "iam_instance_profile = \"${{ secrets.AWS_IAM_PROFILE }}\"" >> terraform.tfvars
           cat terraform.tfvars
 
       - name: Terraform Init

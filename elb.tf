@@ -38,13 +38,6 @@ locals {
 resource "aws_lb_target_group_attachment" "this" {
   for_each = local.instance_ids
 
-  # covert a list of instance objects to a map with instance ID as the key, and an instance
-  # object as the value.
-#   for_each = {
-#     for k, v in aws_instance.public_ec3 :
-#     v.id => v
-#   }
-
   target_group_arn = aws_lb_target_group.this[0].arn
   target_id        = each.value
   port             = 80
@@ -58,8 +51,8 @@ resource "aws_lb_listener" "this" {
   load_balancer_arn = aws_lb.this[count.index].arn
   port              = "80"
   protocol          = "HTTP"
-#   ssl_policy        = "ELBSecurityPolicy-2016-08"
-#   certificate_arn   = "arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4"
+  # ssl_policy        = "ELBSecurityPolicy-2016-08"
+  # certificate_arn   = "arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4"
 
   default_action {
     type             = "forward"

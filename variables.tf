@@ -21,18 +21,31 @@ variable "instance_name" {
   }
   description = "EC2 server name and type"
 } 
-
 variable "s3_bucket_tf_state" {
   type = string
   default = ""
 }
-
 variable "tf_state_key" {
   type = string
   default = ""
 }
-
 variable "region" {
   type = string
-    default = "us-east-1"
+  default = "us-east-1"
+}
+variable "subnet_id" {
+  type = string
+  default = "us-east-1"
+}
+variable "vpc_id" {
+  type = string
+  default = "us-east-1"
+}
+variable "key_name" {
+  type = string
+  default = "us-east-1"
+}
+variable "iam_instance_profile" {
+  type = string
+  default = "us-east-1"
 }

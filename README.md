@@ -4,4 +4,6 @@ This project leverages GitOps practices to automate the management of infrastruc
 
 The repository is integrated with AWS through OpenID Connect (OIDC). This method ensures secure permissions granting to Git, eliminating the need to store AWS access keys and secret key credentials in the repository secrets.
 
+Solution Overview:
 
+![Alt text](WebApp-overview.png)
